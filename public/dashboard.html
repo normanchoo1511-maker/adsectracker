@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Leave — Leave Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="6" width="22" height="19" rx="3" stroke="white" stroke-width="2"/>
+      <path d="M9 3v6M19 3v6M3 13h22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <rect x="8" y="17" width="4" height="4" rx="1" fill="white"/>
+      <rect x="16" y="17" width="4" height="4" rx="1" fill="white"/>
+    </svg>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="/dashboard" class="active">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+        </svg>
+      </span>
+      <span class="nav-label">Calendar</span>
+    </a>
+    <a href="#" onclick="openLeaveModal('annual'); return false;">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 2c-2-2-4-2-5.5-.5L10 5 1.8 6.2c-.5.1-.9.5-1 1-.1.6.1 1.2.6 1.5L6 11l-2 3.5c-.3.6-.2 1.3.3 1.8.5.5 1.2.6 1.8.3L9.5 14l3.5 4.5c.3.4.9.6 1.4.5.5-.1.9-.5 1-.9z"/>
+        </svg>
+      </span>
+      <span class="nav-label">Annual</span>
+    </a>
+    <a href="#" onclick="openLeaveModal('medical'); return false;">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2z"/>
+        </svg>
+      </span>
+      <span class="nav-label">Medical</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+    <a onclick="logout()">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </span>
+      <span class="nav-label">Sign out</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-content">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="topbar-title" id="topbar-greeting">Good morning</div>
+        <div class="topbar-sub" id="topbar-sub">Loading your leave dashboard…</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <select class="year-select" id="year-select" onchange="loadAll()"></select>
+      <button class="btn btn-primary btn-sm" onclick="openLeaveModal('annual')" style="display:flex;align-items:center;gap:6px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Apply Leave
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Pending approval notice -->
+    <div id="pending-notice" class="alert-banner d-none" style="margin-bottom:20px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="pending-notice-text"></span>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row" style="grid-template-columns: repeat(4,1fr)">
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Annual Leave</div>
+          <div class="stat-value" id="al-remaining">—</div>
+          <div class="stat-sub" id="al-sub">days remaining</div>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar" id="al-bar" style="background:var(--green);width:0%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Medical Leave</div>
+          <div class="stat-value" id="ml-remaining">—</div>
+          <div class="stat-sub" id="ml-sub">days remaining</div>
+          <div class="stat-bar-wrap">
+            <div class="stat-bar" id="ml-bar" style="background:var(--red);width:0%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Pending Requests</div>
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-sub">awaiting approval</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon indigo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Approved This Year</div>
+          <div class="stat-value" id="stat-approved">0</div>
+          <div class="stat-sub">leave days taken</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Big Calendar -->
+    <div class="card mb-4" style="margin-bottom:20px">
+      <div class="card-header">
+        <div>
+          <div class="card-title">My Leave Calendar</div>
+          <div class="card-sub">Click a date to apply leave · Click an event for details</div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Annual (Pending)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Annual (Approved)</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Medical Leave</div>
+        </div>
+      </div>
+      <div class="calendar-wrap">
+        <div id="calendar"></div>
+      </div>
+    </div>
+
+    <!-- Recent leave requests -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Leave History</div>
+          <div class="card-sub" id="history-sub">Your requests this year</div>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn btn-success btn-sm" onclick="openLeaveModal('annual')" style="display:flex;align-items:center;gap:5px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 2c-2-2-4-2-5.5-.5L10 5 1.8 6.2c-.5.1-.9.5-1 1-.1.6.1 1.2.6 1.5L6 11l-2 3.5c-.3.6-.2 1.3.3 1.8.5.5 1.2.6 1.8.3L9.5 14l3.5 4.5c.3.4.9.6 1.4.5.5-.1.9-.5 1-.9z"/></svg>
+            Annual
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="openLeaveModal('medical')" style="display:flex;align-items:center;gap:5px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2z"/></svg>
+            Medical
+          </button>
+        </div>
+      </div>
+      <div style="padding:0 20px 4px" id="leave-list">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="40" height="40" style="margin-bottom:12px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <p>No leave records found.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Leave Request Modal ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h5 id="modal-title">Apply Leave</h5>
+      <button class="modal-close" onclick="closeModal('leaveModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="leave-type">
+      <div id="form-error" class="error-box d-none"></div>
+      <div id="leave-info" class="info-box mb-3" style="margin-bottom:16px"></div>
+
+      <div class="form-row mb-3" style="margin-bottom:16px">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="leave-start" required>
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">End Date</label>
+          <input type="date" class="form-control" id="leave-end" required>
+        </div>
+      </div>
+
+      <div id="days-preview-wrap" class="d-none" style="margin-bottom:16px">
+        <span class="days-preview-pill" id="days-preview-text"></span>
+      </div>
+
+      <div id="reason-group" class="form-group">
+        <label class="form-label">Reason <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted)">(optional)</span></label>
+        <textarea class="form-control" id="leave-reason" rows="2" placeholder="Brief reason…"></textarea>
+      </div>
+      <div id="mc-group" class="form-group d-none">
+        <label class="form-label">MC / Clinic Details <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted)">(optional)</span></label>
+        <input type="text" class="form-control" id="mc-note" placeholder="e.g. Raffles Medical, 2-day MC">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('leaveModal')">Cancel</button>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitLeave()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Event Detail Modal ──────────────────────────────────────────── -->
+<div class="modal-overlay" id="eventModal">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-header">
+      <h5 id="event-modal-title">Leave Details</h5>
+      <button class="modal-close" onclick="closeModal('eventModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="event-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('eventModal')">Close</button>
+      <button class="btn btn-danger btn-sm d-none" id="cancel-leave-btn">Cancel Leave</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

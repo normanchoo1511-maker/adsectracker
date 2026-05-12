@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Leave Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 28 28" fill="none">
+      <rect x="3" y="6" width="22" height="19" rx="3" stroke="white" stroke-width="2"/>
+      <path d="M9 3v6M19 3v6M3 13h22" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      <rect x="8" y="17" width="4" height="4" rx="1" fill="white"/>
+      <rect x="16" y="17" width="4" height="4" rx="1" fill="white"/>
+    </svg>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="#" onclick="showSection('approvals'); return false;" class="active" id="nav-approvals">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/>
+        </svg>
+      </span>
+      <span class="nav-label">Approvals</span>
+    </a>
+    <a href="#" onclick="showSection('employees'); return false;" id="nav-employees">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </span>
+      <span class="nav-label">Staff</span>
+    </a>
+    <a href="#" onclick="showSection('calendar'); return false;" id="nav-calendar">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+        </svg>
+      </span>
+      <span class="nav-label">Calendar</span>
+    </a>
+    <a href="#" onclick="showSection('settings'); return false;" id="nav-settings">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </span>
+      <span class="nav-label">Settings</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-avatar" id="sidebar-avatar">A</div>
+    <a onclick="logout()">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </span>
+      <span class="nav-label">Sign out</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-content">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div>
+        <div class="topbar-title" id="page-title">Pending Approvals</div>
+        <div class="topbar-sub" id="page-sub">Review and action leave requests</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <select class="year-select" id="year-select" onchange="loadAll()"></select>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <!-- Stats row -->
+    <div class="stats-row" id="stats-row" style="margin-bottom:20px">
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="stat-pending">0</div>
+          <div class="stat-sub">awaiting review</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Approved</div>
+          <div class="stat-value" id="stat-approved">0</div>
+          <div class="stat-sub">this year</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2a2 2 0 0 0 2-2v-5h5a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Medical Leave</div>
+          <div class="stat-value" id="stat-medical">0</div>
+          <div class="stat-sub">days recorded</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon indigo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-label">Employees</div>
+          <div class="stat-value" id="stat-employees">0</div>
+          <div class="stat-sub">total staff</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── APPROVALS SECTION ──────────────────────────────────────── -->
+    <div id="section-approvals">
+      <div id="approvals-list"></div>
+    </div>
+
+    <!-- ── EMPLOYEES + CALENDAR SECTION ─────────────────────────── -->
+    <div id="section-employees" class="d-none">
+      <div class="admin-grid">
+
+        <!-- Left: employee list -->
+        <div class="emp-panel">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">All Staff</div>
+            </div>
+            <div style="padding:12px 12px 4px;position:relative">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="position:absolute;left:22px;top:50%;transform:translateY(-50%);pointer-events:none">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input class="emp-search" id="emp-search" placeholder="Search by name…" oninput="filterEmployees()" style="padding-left:32px">
+            </div>
+            <div style="padding:0 8px 12px;max-height:520px;overflow-y:auto" id="emp-list"></div>
+          </div>
+        </div>
+
+        <!-- Right: selected employee calendar -->
+        <div id="emp-calendar-panel">
+          <div class="card" id="emp-empty-state">
+            <div class="empty-state" style="padding:60px 20px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" width="48" height="48" style="margin-bottom:16px">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <p style="font-size:14px;color:var(--text-secondary);font-weight:500">Select an employee to view their leave calendar</p>
+            </div>
+          </div>
+
+          <div class="d-none" id="emp-detail">
+            <div class="card" style="margin-bottom:16px">
+              <div style="padding:16px 20px;display:flex;align-items:center;gap:14px">
+                <div class="emp-avatar" id="detail-avatar" style="width:52px;height:52px;border-radius:14px;font-size:18px">?</div>
+                <div style="flex:1">
+                  <div style="font-size:16px;font-weight:700" id="detail-name">—</div>
+                  <div style="font-size:13px;color:var(--text-muted)" id="detail-dept">—</div>
+                </div>
+                <div style="display:flex;gap:16px;align-items:center">
+                  <div style="text-align:center">
+                    <div style="font-size:22px;font-weight:800;color:var(--green)" id="detail-al">—</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px">AL left</div>
+                  </div>
+                  <div style="width:1px;height:32px;background:var(--border)"></div>
+                  <div style="text-align:center">
+                    <div style="font-size:22px;font-weight:800;color:var(--red)" id="detail-ml">—</div>
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px">ML left</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title" id="detail-cal-title">Leave Calendar</div>
+                  <div class="card-sub">Click pending events to approve or reject</div>
+                </div>
+                <div class="legend">
+                  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Pending</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Approved</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Medical</div>
+                </div>
+              </div>
+              <div class="calendar-wrap">
+                <div id="emp-calendar"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SETTINGS SECTION ──────────────────────────────────────── -->
+    <div id="section-settings" class="d-none">
+      <div style="max-width:700px">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Manage Staff Accounts</div>
+              <div class="card-sub">Remove employees or admin accounts. You cannot remove your own account.</div>
+            </div>
+            <div id="settings-user-count" style="font-size:12px;color:var(--text-muted)"></div>
+          </div>
+
+          <!-- Search -->
+          <div style="padding:14px 20px 0;position:relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="position:absolute;left:32px;top:50%;transform:translateY(-50%);pointer-events:none;margin-top:7px">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input id="settings-search" placeholder="Search by name, email or department…"
+              oninput="filterSettingsUsers()"
+              style="width:100%;padding:9px 12px 9px 34px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;outline:none;color:var(--text-primary)">
+          </div>
+
+          <div id="settings-user-list" style="padding:8px 12px 12px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TEAM CALENDAR SECTION ──────────────────────────────────── -->
+    <div id="section-calendar" class="d-none">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Team Calendar</div>
+            <div class="card-sub">All staff leave at a glance</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="tab-pills">
+              <button class="tab-pill active" onclick="setTeamFilter('all',this)">All</button>
+              <button class="tab-pill" onclick="setTeamFilter('pending',this)">Pending</button>
+              <button class="tab-pill" onclick="setTeamFilter('approved',this)">Approved</button>
+              <button class="tab-pill" onclick="setTeamFilter('medical',this)">Medical</button>
+            </div>
+            <div class="legend" style="margin-left:8px">
+              <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Pending</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Approved</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Medical</div>
+            </div>
+          </div>
+        </div>
+        <div class="calendar-wrap">
+          <div id="team-calendar"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Review Modal ───────────────────────────────────────────── -->
+<div class="modal-overlay" id="reviewModal">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-header">
+      <h5 id="review-modal-title">Review Leave Request</h5>
+      <button class="modal-close" onclick="closeModal('reviewModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="review-modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('reviewModal')">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="reject-btn">Reject</button>
+      <button class="btn btn-success btn-sm" id="approve-btn">Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Remove User Confirmation Modal ──────────────────────────── -->
+<div class="modal-overlay" id="removeModal">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-header">
+      <h5>Remove Staff Member</h5>
+      <button class="modal-close" onclick="closeModal('removeModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:14px;align-items:flex-start">
+        <div style="width:40px;height:40px;border-radius:10px;background:#fee2e2;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        </div>
+        <div>
+          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:var(--text-primary)">Remove <span id="remove-modal-name"></span>?</p>
+          <p style="margin:0;font-size:13px;color:var(--text-muted);line-height:1.5">This will permanently delete their account and all leave records. This action cannot be undone.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('removeModal')">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="confirm-remove-btn" style="display:flex;align-items:center;gap:5px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Remove Account
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
