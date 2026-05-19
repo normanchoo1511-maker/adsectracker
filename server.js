@@ -4,6 +4,7 @@ const session = require('express-session');
 const bcrypt  = require('bcryptjs');
 const path    = require('path');
 const { connectDB, nextId } = require('./database');
+const { sendLeaveNotification } = require('./email');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -211,6 +212,17 @@ app.post('/api/leave-requests', requireAuth, async (req, res) => {
 
     if (type === 'medical') {
       await db.collection('users').updateOne({ id: userId }, { $inc: { medical_leave_used: days } });
+    }
+
+    // Email all admins
+    try {
+      const admins = await db.collection('users').find({ role: 'admin' }).toArray();
+      const adminEmails = admins.map(a => a.email).filter(Boolean);
+      if (adminEmails.length) {
+        await sendLeaveNotification({ adminEmails, employee: user, leaveRequest: lr });
+      }
+    } catch (emailErr) {
+      console.error('Email notification failed (non-fatal):', emailErr.message);
     }
 
     res.json({ id, status, days_count: days });
