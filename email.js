@@ -1,12 +1,6 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS   // Gmail App Password (not your normal password)
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', {
@@ -15,8 +9,8 @@ function formatDate(dateStr) {
 }
 
 async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log('Email env vars not set — skipping notification');
+  if (!process.env.RESEND_API_KEY) {
+    console.log('RESEND_API_KEY not set — skipping notification');
     return;
   }
 
@@ -119,7 +113,7 @@ async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
 
             ${isAnnual ? `
             <div class="cta">
-              <a href="${process.env.APP_URL || 'http://localhost:3000'}/admin">Review Request →</a>
+              <a href="${process.env.APP_URL || 'https://adsec-tracker.onrender.com'}/admin">Review Request →</a>
             </div>` : ''}
           </div>
 
@@ -132,14 +126,18 @@ async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
     </html>
   `;
 
-  await transporter.sendMail({
-    from: `"Leave Tracker" <${process.env.EMAIL_USER}>`,
-    to:   adminEmails.join(', '),
+  const { data, error } = await resend.emails.send({
+    from: 'Leave Tracker <onboarding@resend.dev>',
+    to: adminEmails,
     subject,
     html
   });
 
-  console.log(`Leave notification sent to: ${adminEmails.join(', ')}`);
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  console.log(`Leave notification sent to: ${adminEmails.join(', ')} (id: ${data.id})`);
 }
 
 module.exports = { sendLeaveNotification };
