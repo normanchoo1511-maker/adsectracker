@@ -1,7 +1,3 @@
-const { Resend } = require('resend');
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-GB', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -9,13 +5,13 @@ function formatDate(dateStr) {
 }
 
 async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
-  if (!process.env.RESEND_API_KEY) {
-    console.log('RESEND_API_KEY not set — skipping notification');
+  if (!process.env.BREVO_API_KEY) {
+    console.log('BREVO_API_KEY not set — skipping notification');
     return;
   }
 
-  const isAnnual   = leaveRequest.type === 'annual';
-  const typeLabel  = isAnnual ? 'Annual Leave' : 'Medical Leave';
+  const isAnnual  = leaveRequest.type === 'annual';
+  const typeLabel = isAnnual ? 'Annual Leave' : 'Medical Leave';
   const statusNote = isAnnual
     ? 'This request requires your approval.'
     : 'This has been automatically approved.';
@@ -26,7 +22,7 @@ async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
 
   const subject = isAnnual
     ? `Leave Request — ${employee.name} (${leaveRequest.days_count} day${leaveRequest.days_count !== 1 ? 's' : ''})`
-    : `Medical Leave Filed — ${employee.name}`;
+    : `Medical Leave Update — ${employee.name}`;
 
   const html = `
     <!DOCTYPE html>
@@ -72,7 +68,7 @@ async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
               </div>
               <div>
                 <h1>Leave Tracker</h1>
-                <p>New ${typeLabel} Request</p>
+                <p>New ${typeLabel} ${isAnnual ? 'Request' : 'Update'}</p>
               </div>
             </div>
           </div>
@@ -126,18 +122,28 @@ async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
     </html>
   `;
 
-  const { data, error } = await resend.emails.send({
-    from: 'Leave Tracker <onboarding@resend.dev>',
-    to: adminEmails,
-    subject,
-    html
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: { name: 'Leave Tracker', email: 'adsectracker@gmail.com' },
+      to: adminEmails.map(e => ({ email: e })),
+      subject,
+      htmlContent: html
+    })
   });
 
-  if (error) {
-    throw new Error(error.message);
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Brevo API error');
   }
 
-  console.log(`Leave notification sent to: ${adminEmails.join(', ')} (id: ${data.id})`);
+  console.log(`Leave notification sent to: ${adminEmails.join(', ')}`);
 }
 
 module.exports = { sendLeaveNotification };
