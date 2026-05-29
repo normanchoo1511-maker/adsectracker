@@ -44,10 +44,11 @@ async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
           border-radius: 8px; padding: 14px 16px; margin-bottom: 24px;
           font-size: 14px; color: ${isAnnual ? '#3730a3' : '#991b1b'}; font-weight: 600;
         }
-        .detail-row { display: flex; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-label { color: #64748b; }
-        .detail-value { font-weight: 600; color: #0f172a; text-align: right; max-width: 60%; }
+        .detail-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .detail-table td { padding: 11px 0; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .detail-table tr:last-child td { border-bottom: none; }
+        .detail-label { color: #64748b; white-space: nowrap; padding-right: 16px; width: 35%; }
+        .detail-value { font-weight: 600; color: #0f172a; text-align: right; }
         .cta { text-align: center; margin-top: 24px; }
         .cta a {
           display: inline-block; background: #4f46e5; color: white;
@@ -76,36 +77,38 @@ async function sendLeaveNotification({ adminEmails, employee, leaveRequest }) {
           <div class="body">
             <div class="alert-box">${statusNote}</div>
 
-            <div class="detail-row">
-              <span class="detail-label">Employee</span>
-              <span class="detail-value">${employee.name}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Department</span>
-              <span class="detail-value">${employee.department || '—'}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Leave Type</span>
-              <span class="detail-value">${typeLabel}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Date(s)</span>
-              <span class="detail-value">${dateRange}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Duration</span>
-              <span class="detail-value">${leaveRequest.days_count} working day${leaveRequest.days_count !== 1 ? 's' : ''}</span>
-            </div>
-            ${leaveRequest.reason ? `
-            <div class="detail-row">
-              <span class="detail-label">Reason</span>
-              <span class="detail-value">${leaveRequest.reason}</span>
-            </div>` : ''}
-            ${leaveRequest.mc_note ? `
-            <div class="detail-row">
-              <span class="detail-label">MC Details</span>
-              <span class="detail-value">${leaveRequest.mc_note}</span>
-            </div>` : ''}
+            <table class="detail-table">
+              <tr>
+                <td class="detail-label">Employee:</td>
+                <td class="detail-value">${employee.name}</td>
+              </tr>
+              <tr>
+                <td class="detail-label">Department:</td>
+                <td class="detail-value">${employee.department || '—'}</td>
+              </tr>
+              <tr>
+                <td class="detail-label">Leave Type:</td>
+                <td class="detail-value">${typeLabel}</td>
+              </tr>
+              <tr>
+                <td class="detail-label">Date(s):</td>
+                <td class="detail-value">${dateRange}</td>
+              </tr>
+              <tr>
+                <td class="detail-label">Duration:</td>
+                <td class="detail-value">${leaveRequest.days_count} working day${leaveRequest.days_count !== 1 ? 's' : ''}</td>
+              </tr>
+              ${leaveRequest.reason ? `
+              <tr>
+                <td class="detail-label">Reason:</td>
+                <td class="detail-value">${leaveRequest.reason}</td>
+              </tr>` : ''}
+              ${leaveRequest.mc_note ? `
+              <tr>
+                <td class="detail-label">MC Details:</td>
+                <td class="detail-value">${leaveRequest.mc_note}</td>
+              </tr>` : ''}
+            </table>
 
             ${isAnnual ? `
             <div class="cta">
